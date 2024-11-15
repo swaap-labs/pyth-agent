@@ -1,0 +1,39 @@
+[pythd_api_server]
+listen_address = "127.0.0.1:8910"
+
+[primary_network]
+
+# HTTP(S) endpoint of the RPC node.
+rpc_url = "https://api.pythtest.pyth.network"
+
+# WS(S) endpoint of the RRC node. This is used to subscribe to account changes
+# on the network. This can be omitted when oracle.subscriber_enabled is set to
+# false.
+wss_url = "wss://api.pythtest.pyth.network"
+
+# Path to your publishing keypair.
+key_store.publish_keypair_path = "testnet_publish_key_pair.json"
+
+# Oracle program pubkey
+key_store.program_key = "8tfDNiaEyrV6Q1U4DEXrEigs9DoDtkugzFbybENEbCDz" # conformance
+# key_store.program_key = "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s" # cross-chain
+
+# Pythtest accumulator key (only for the cross-chain oracle)
+# key_store.accumulator_key = "7Vbmv1jt4vyuqBZcpYPpnVhrqVe5e6ZPb6JxDcffRHUM"
+
+# The price store program key (only for the cross-chain oracle)
+# key_store.pyth_price_store_program_key = "3m6sv6HGqEbuyLV84mD7rJn4MAC9LhUa1y1AUNVqcPfr"
+
+# Set the max price updates per transaction to 47 (only for the cross-chain oracle)
+# exporter.max_batch_size = 47
+
+# Duration of the interval at which to publish updates
+exporter.publish_interval_duration = "400ms"
+
+# Configuration for the JRPC API
+[pythd_adapter]
+
+# The duration of the interval at which `notify_price_sched` notifications will be sent.
+# Note that this doesn't affect the rate at which transactions are published:
+# this is soley a backwards-compatibility API feature.
+notify_price_sched_interval_duration = "400ms"
