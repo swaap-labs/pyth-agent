@@ -13,3 +13,5 @@ keystore
 
 # Mac OS
 .DS_Store
+
+dev_publish_key_pair.json

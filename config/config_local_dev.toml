@@ -1,0 +1,214 @@
+# Configuration for the JRPC API Websocket Server
+[pythd_api_server]
+# The address on which the websocket API server will listen.
+#
+# NOTE: non-loopback addresses must be used carefully, making sure the
+# connection is not exposed for unauthorized access.
+listen_address = "0.0.0.0:8910"
+
+# Size of the buffer of each Server's channel on which `notify_price` events are
+# received from the Price state.
+# notify_price_tx_buffer = 10000
+
+# Size of the buffer of each Server's channel on which `notify_price_sched` events are
+# received from the Price state.
+# notify_price_sched_tx_buffer = 10000
+
+# Whether flush messages and responses to the client immediately. Once disabled the
+# messages will be flushed every `flush_interval_duration`. Disabling it is useful if
+# there are many messages to be sent between the client and the server to avoid overloading
+# the connection.
+instant_flush = true # very important setting when you have many feeds
+
+# Flush interval for responses and notifications. This is the maximum time the
+# server will wait before flushing the messages to the client. It will have no
+# effect if `instant_flush` is set to true.
+# flush_interval_duration = "500ms"
+
+# Configuration for the primary network this agent will publish data to. In most cases this should be a Pythnet endpoint.
+[primary_network]
+### Required fields ###
+
+# HTTP(S) endpoint of the RPC node. Public RPC endpoints are usually
+# rate-limited for Pythnet, and so a private endpoint should be used in most
+# cases. For Pythtest, the public endpoint can be used.
+rpc_url = "https://api.pythtest.pyth.network"
+
+# WS(S) endpoint of the RRC node. This is used to subscribe to account changes on the network.
+# This can be omitted when oracle.subscriber_enabled is set to false.
+wss_url = "wss://api.pythtest.pyth.network"
+
+# Path to the keypair used to publish price updates. If set to a
+# non-existent file path, the system expects a keypair to be loaded
+# via the remote keypair loader. If the path is valid, the remote
+# keypair loading is disabled.
+key_store.publish_keypair_path = "/path/to/dev_publish_key_pair.json"
+
+# Public key of the oracle program
+key_store.program_key = "8tfDNiaEyrV6Q1U4DEXrEigs9DoDtkugzFbybENEbCDz"
+
+# # The price store program key
+# key_store.pyth_price_store_program_key = "3m6sv6HGqEbuyLV84mD7rJn4MAC9LhUa1y1AUNVqcPfr"
+
+### Optional fields of primary/secondary network config ###
+
+# Pubkey of accumulator message buffer program ID. Setting this
+# value enables accumulator support on publishing transactions.
+# key_store.accumulator_key = <not set by default>
+#
+# IMPORTANT: When publishing with accumulator_key defined,
+# max_batch_size must be decreased to 7
+# exporter.max_batch_size = 7
+
+# The interval with which to poll account information.
+# oracle.poll_interval_duration = "2m"
+
+# Whether subscribing to account updates over websocket is enabled
+# oracle.subscriber_enabled = true
+
+# Ask the Solana RPC for up to this many product/price accounts in a
+# single request. Tune this setting if you're experiencing timeouts on
+# data fetching. In order to keep concurrent open socket count at bay,
+# the batches are looked up sequentially, trading off overall time it
+# takes to fetch all symbols.
+# oracle.max_lookup_batch_size = 100
+
+# How often to refresh the cached network state (current slot and blockhash).
+# It is recommended to set this to slightly less than the network's block time,
+# as the slot fetched will be used as the time of the price update.
+# exporter.refresh_network_state_interval_duration = "200ms"
+
+# Duration of the interval at which to publish updates
+exporter.publish_interval_duration = "400ms"
+
+# Age after which a price update is considered stale and not published
+# exporter.staleness_threshold = "5s"
+
+# Wait at least this long before publishing an unchanged price
+# state; unchanged price state means only timestamp has changed
+# with other state identical to last published state.
+# exporter.unchanged_publish_threshold = "3s"
+
+# Maximum size of a batch.
+# IMPORTANT: the maximum size of 47 only works when the price store program key is passed;
+# otherwise, the maximum batch size is 12
+exporter.max_batch_size = 12
+
+# Number of compute units requested per update_price instruction within the transaction.
+# exporter.compute_unit_limit = 60000
+
+# Price per compute unit offered for update_price transactions
+# exporter.compute_unit_price_micro_lamports =
+
+# Whether the dynamic compute unit pricing is enabled. When enabled, the compute unit price is
+# calculated based on the network previous prioritization fees.
+# exporter.dynamic_compute_unit_pricing_enabled = false
+
+# Maximum compute unit price offered for update_price transactions. Defaults to
+# 1 million microlamports. This is a safety measure while using dynamic compute
+# price to prevent the exporter from paying too much for a single transaction.
+# exporter.maximum_compute_unit_price_micro_lamports = 1000000
+
+# Maximum slot gap between the current slot and the oldest slot amongst all the accounts in
+# the batch. This is used to calculate the dynamic price per compute unit. When the slot gap
+# reaches this number we will use the maximum total_compute_fee for the transaction.
+# exporter.maximum_slot_gap_for_dynamic_compute_unit_price = 25
+
+# Duration of the interval with which to poll the status of transactions.
+# It is recommended to set this to a value close to exporter.publish_interval_duration
+# exporter.transaction_monitor.poll_interval_duration = "4s"
+
+# Maximum number of recent transactions to monitor. When this number is exceeded,
+# the oldest transactions are no longer monitored. It is recommended to set this to
+# a value at least as large as (number of products published / number of products in a batch).
+# exporter.transaction_monitor.max_transactions = "100"
+
+### Optional config sections ###
+
+## Metrics server section ##
+
+# [metrics_server]
+#
+# Where to serve metrics. Metrics live under "/metrics"
+# NOTE: non-loopback addresses must be used carefully, making sure the
+# connection is not exposed for unauthorized access.
+# bind_address = "127.0.0.1:8888"
+
+## Remote keypair loader section. ##
+
+# [remote_keypair_loader}
+# Where to serve the remote keypair loading endpoint, under
+# "/primary/load_keypair" and "/secondary/load_keypair".
+#
+# NOTE: non-loopback addresses must be used carefully, making sure the
+# connection is not exposed for unauthorized access.
+# bind_address = "127.0.0.1:9001"
+
+# How much whole SOL must a keypair hold to be considered valid for
+# use on a given network. Disabled with 0.
+# primary_min_keypair_balance_sol = 1
+# secondary_min_keypair_balance_sol = 1
+
+
+## Channel capacities section. ##
+
+# These refer to async messaging channels
+# internally used by the agent's subroutines
+
+# [channel_capacities]
+# Capacity of the channel used to broadcast shutdown events to all
+# components
+# shutdown = 10000
+
+# Capacity of the channel used to send updates from the primary Oracle
+# to the Global Store
+# primary_oracle_updates = 10000
+
+# Capacity of the channel used to send updates from the secondary
+# Oracle to the Global Store
+# secondary_oracle_updates = 10000
+
+# Capacity of the channel the Pythd API Adapter uses to send lookup
+# requests to the Global Store
+# global_store_lookup = 10000
+
+# Capacity of the channel the Pythd API Adapter uses to communicate
+# with the Local Store
+# local_store_lookup = 10000
+
+# Capacity of the channel on which the Local Store receives messages
+# local_store = 10000
+
+# Capacity of the channel on which the Pythd API Adapter receives
+# messages
+# pythd_adapter = 10000
+
+# Capacity of the slog logging channel. Adjust this value if you see
+# complaints about channel capacity from slog
+# logger_buffer = 10000
+
+
+## JRPC API config section. ##
+
+# [pythd_adapter]
+# The duration of the interval at which `notify_price_sched` notifications will be sent.
+# Note that this doesn't affect the rate at which transactions are published:
+# this is soley a backwards-compatibility API feature.
+notify_price_sched_interval_duration = "400ms"
+
+## Optional secondary network section ##
+
+# Configuration for the optional secondary network this agent will
+# publish data to. In most cases this should be a Solana endpoint. The
+# options correspond to the ones in primary_network
+# [secondary_network]
+
+
+## Configuration for OpenTelemetry ##
+[opentelemetry]
+
+# Timeout duration for the OpenTelemetry exporter
+exporter_timeout_duration = "3s"
+
+# Endpoint URL for the OpenTelemetry exporter
+exporter_endpoint = "http://127.0.0.1:4317"
